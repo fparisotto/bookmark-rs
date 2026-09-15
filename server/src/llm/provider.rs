@@ -106,6 +106,11 @@ async fn probe_embedding_dimensions(client: &EmbeddingClient, model: &str) -> Re
                 .embed_text("dimension probe")
                 .await?
         }
+        EmbeddingClient::OpenRouter(c) => {
+            c.embedding_model(model)
+                .embed_text("dimension probe")
+                .await?
+        }
     };
     Ok(embedding
         .vec
@@ -129,6 +134,11 @@ fn infer_embedding_dimensions(provider: &str, model: &str) -> Option<usize> {
         "ollama" => match model {
             "all-minilm" => Some(384),
             "nomic-embed-text" => Some(768),
+            _ => None,
+        },
+        "openrouter" => match model {
+            "google/gemini-embedding-001" | "openai/text-embedding-3-large" => Some(3072),
+            "openai/text-embedding-3-small" | "openai/text-embedding-ada-002" => Some(1536),
             _ => None,
         },
         _ => None,
@@ -249,8 +259,25 @@ fn build_embedding_client(provider: &str, params: &LlmParams) -> Result<Embeddin
                 .build()?;
             Ok(EmbeddingClient::Gemini(client))
         }
+        "openrouter" => {
+            let key = params
+                .llm_embedding_api_key
+                .as_ref()
+                .map(ExposeSecret::expose_secret)
+                .or(params.openrouter_api_key.as_ref().map(ExposeSecret::expose_secret))
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "OPENROUTER_API_KEY or LLM_EMBEDDING_API_KEY required for openrouter embeddings"
+                    )
+                })?;
+            let client = openrouter::Client::builder()
+                .api_key(key)
+                .http_client(http_client(params)?)
+                .build()?;
+            Ok(EmbeddingClient::OpenRouter(client))
+        }
         other => bail!(
-            "Provider '{other}' does not support embeddings. Use LLM_EMBEDDING_PROVIDER to select ollama, openai, or gemini for embeddings."
+            "Provider '{other}' does not support embeddings. Use LLM_EMBEDDING_PROVIDER to select ollama, openai, gemini, or openrouter for embeddings."
         ),
     }
 }

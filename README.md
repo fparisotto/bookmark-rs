@@ -154,10 +154,8 @@ export LLM_EMBEDDING_DIMENSION=1536
 ```bash
 export LLM_PROVIDER=openrouter
 export OPENROUTER_API_KEY=sk-or-...
-export LLM_TEXT_MODEL=anthropic/claude-sonnet-4
-export LLM_EMBEDDING_PROVIDER=openai
-export LLM_EMBEDDING_API_KEY=sk-...
-export LLM_EMBEDDING_MODEL=text-embedding-3-small
+export LLM_TEXT_MODEL=google/gemini-3.1-flash-lite
+export LLM_EMBEDDING_MODEL=google/gemini-embedding-001
 export LLM_EMBEDDING_DIMENSION=1536
 ```
 

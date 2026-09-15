@@ -261,6 +261,16 @@ pub async fn embeddings_with_dimensions(
                     .embed_text(text)
                     .await
                     .map_err(anyhow::Error::from),
+                (EmbeddingClient::OpenRouter(c), Some(dimensions)) => c
+                    .embedding_model_with_ndims(model_name, dimensions)
+                    .embed_text(text)
+                    .await
+                    .map_err(anyhow::Error::from),
+                (EmbeddingClient::OpenRouter(c), None) => c
+                    .embedding_model(model_name)
+                    .embed_text(text)
+                    .await
+                    .map_err(anyhow::Error::from),
             }
         })
         .await?;

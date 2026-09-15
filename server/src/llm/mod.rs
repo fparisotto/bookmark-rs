@@ -31,6 +31,7 @@ pub enum EmbeddingClient {
     Ollama(ollama::Client),
     OpenAI(openai::Client),
     Gemini(gemini::Client),
+    OpenRouter(openrouter::Client),
 }
 
 #[derive(Debug, Clone, Copy)]
